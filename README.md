@@ -1,74 +1,48 @@
-# Content Ops Starter
+# SecureLink
 
-![Content Ops Starter](https://assets.stackbit.com/docs/content-ops-starter-thumb.png)
+Emergency alerts for Nigeria, by Primers. One tap sends an alert with live location to the nearest
+police, fire, ambulance and road-safety responders. If nobody takes it within two minutes the search
+widens and asks again (up to three times).
 
-Netlify starter that's made for customization with a flexible content model, component library, [visual editing](https://docs.netlify.com/visual-editor/overview/) and [Git Content Source](https://docs.netlify.com/create/content-sources/git/).
+- Public app: https://securelink.primersgroup.ng (this repo)
+- Operator portal: https://portal.securelink.primersgroup.ng (repo `securelink-portal`)
+- Sign-in: Primers ID (client `securelink`, handoff flow)
 
-**⚡ View demo:** [https://content-ops-starter.netlify.app/](https://content-ops-starter.netlify.app/)
+## How it works
 
-## Table of Contents
+| Part | Where |
+| --- | --- |
+| Web app (Vite + React) | `src/` — citizen alert, responder queue, incident map |
+| Database + API | Supabase project `atgqjrmcvpctywklfigb`, schema `securelink` (`backend/001_securelink.sql`) |
+| Escalation + lost-signal check | `pg_cron` job `securelink-tick`, every 30 s |
+| Live updates | Supabase Realtime private broadcast: `sl:agency:<id>`, `sl:user:<uid>`, `sl:area:<cell>`, `sl:ops` |
+| Audio clips | private storage bucket `securelink-audio` |
+| Retention | `backend/002_retention.sql` + edge function `backend/functions/securelink-retention` (daily) |
 
-- [Deploying to Netlify](#deploying-to-netlify)
-- [Develop with Netlify Visual Editor Locally](#develop-with-netlify-visual-editor-locally)
-- [Building for production](#building-for-production)
-- [Setting Up Algolia Search](#setting-up-algolia-search)
-- [Next Steps](#next-steps)
-- [Support](#support)
+Tables in `securelink` have RLS on and no policies: every read and write goes through the
+`public.securelink_*` functions, which check the caller's role (citizen, responder, agency_admin,
+platform_admin). Operators can see a victim's details only through a time-limited break-glass grant,
+and every such view is written to the audit log.
 
-## Deploying to Netlify
+## Develop
 
-If you click "Deploy to Netlify" button, it will create a new repo for you that looks exactly like this one, and sets that repo up immediately for deployment on Netlify.
-
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/netlify-templates/content-ops-starter)
-
-## Develop with Netlify Visual Editor Locally
-
-The typical development process is to begin by working locally. Clone this repository, then run `npm install` in its root directory.
-
-Run the Next.js development server:
-
-```txt
-cd content-ops-starter
-npm run dev
-```
-
-Install the [Netlify Visual Editor CLI](https://www.npmjs.com/package/@stackbit/cli). Then open a new terminal window in the same project directory and run the Netlify visual editor dev server:
-
-```txt
-npm install -g @stackbit/cli
-stackbit dev
-```
-
-This outputs your own Netlify visual editor URL. Open this, register, or sign in, and you will be directed to Netlify's visual editor for your new project.
-
-![Next.js Dev + Visual Editor Dev](https://assets.stackbit.com/docs/next-dev-stackbit-dev.png)
-
-## Building for production
-
-To build a static site for production, run the following command
-
-```shell
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm test         # deploy-config checks
 npm run build
 ```
 
-## Setting Up Algolia Search
+No environment variables are needed: the Supabase URL and publishable key are public and live in
+`src/lib/supabase.js`. Pushing to `main` deploys to Vercel (project `securelink-app`).
 
-This starter includes Algolia search integration. To set it up:
+## Responders
 
-1. Create an [Algolia](https://www.algolia.com/) account
-2. Create a new application and index
-3. Set the following environment variables:
-   - `NEXT_PUBLIC_ALGOLIA_APP_ID` - Your Algolia application ID
-   - `NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY` - Your Algolia search-only API key
-   - `NEXT_PUBLIC_ALGOLIA_INDEX_NAME` - Your index name
+1. In the portal, create an agency (kinds, base location, radius) and issue an invite code.
+2. The responder signs in to the app with Primers ID, opens Settings → Join an agency, and enters the code.
+3. Alerts in range appear in their Respond queue in real time.
 
-## Next Steps
+## Privacy
 
-Here are a few suggestions on what to do next if you're new to Netlify visual editor:
-
-- Learn [Netlify visual editor overview](https://docs.netlify.com/visual-editor/visual-editing/)
-- Check [Netlify visual editor reference documentation](https://visual-editor-reference.netlify.com/)
-
-## Support
-
-If you get stuck along the way, get help in our [support forums](https://answers.netlify.com/).
+See `/privacy` in the app. Alerts are kept 12 months, the audit log 2 years. Contact:
+primerscorperation@gmail.com.

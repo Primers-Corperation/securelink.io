@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /respond
+Disallow: /alert
+Disallow: /auth

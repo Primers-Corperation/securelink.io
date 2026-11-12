@@ -1,0 +1,13 @@
+{
+  "name": "SecureLink",
+  "short_name": "SecureLink",
+  "description": "Raise an emergency alert and reach the nearest responders.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#03060C",
+  "theme_color": "#03060C",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/securelink-logo.png", "sizes": "500x500", "type": "image/png", "purpose": "any" }
+  ]
+}
