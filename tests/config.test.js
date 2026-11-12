@@ -18,7 +18,7 @@ test('CSP allows the services the app needs and nothing inline', () => {
   assert.ok(csp, 'CSP present');
   assert.match(csp, /connect-src[^;]*https:\/\/atgqjrmcvpctywklfigb\.supabase\.co/);
   assert.match(csp, /connect-src[^;]*wss:\/\/atgqjrmcvpctywklfigb\.supabase\.co/);
-  assert.match(csp, /script-src[^;]*https:\/\/id\.primersgroup\.ng/);
+  assert.match(csp, /script-src 'self';/);
   assert.doesNotMatch(csp, /script-src[^;]*'unsafe-inline'/);
   assert.match(csp, /frame-ancestors 'none'/);
 });

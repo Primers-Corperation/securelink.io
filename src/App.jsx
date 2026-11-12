@@ -26,7 +26,6 @@ export function Header({ back }) {
       <nav className="top-end">
         {me && ['responder', 'agency_admin'].includes(me.role) ? <Link to="/respond" className="chip-link">Responder</Link> : null}
         {me ? <Link to="/settings" className="chip-link" aria-label="Settings">Settings</Link> : null}
-        <span id="primers-bar-slot" />
       </nav>
     </header>
   );
@@ -51,13 +50,6 @@ export default function App() {
     catch (e) { setMeError(e.message); return null; }
   }, [session]);
   useEffect(() => { refreshMe(); }, [refreshMe]);
-
-  // Signing out of Primers ID in the Primers bar signs out here too.
-  useEffect(() => {
-    const onAccount = (e) => { if (e.detail && e.detail.signedIn === false && session) sb.auth.signOut({ scope: 'local' }); };
-    window.addEventListener('primers:account', onAccount);
-    return () => window.removeEventListener('primers:account', onAccount);
-  }, [session]);
 
   // Community alerts: if switched on, keep the coarse area fresh and listen for emergencies nearby.
   useEffect(() => {
